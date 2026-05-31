@@ -20,39 +20,39 @@ function DiffView({ filePath, diff }: { filePath: string; diff: string }) {
   const lines = diff.split('\n')
   const fileName = filePath.split(/[\\/]/).pop() ?? filePath
   return (
-    <div className="flex flex-1 flex-col bg-[#0c0c14] overflow-hidden">
-      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-[#22223a] shrink-0 bg-[#12121c]">
-        <div className="w-5 h-5 rounded-md bg-[#7c6af71a] flex items-center justify-center shrink-0">
-          <GitBranch size={11} className="text-[#a594f9]" />
+    <div className="flex flex-1 flex-col bg-[#0d0b14] overflow-hidden">
+      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-[#2a2240] shrink-0 bg-[#120f1e]">
+        <div className="w-5 h-5 rounded-md bg-[#8b5cf620] flex items-center justify-center shrink-0">
+          <GitBranch size={11} className="text-[#a78bfa]" />
         </div>
-        <span className="text-xs text-[#e4e4f0] font-semibold truncate flex-1">{fileName}</span>
-        <span className="text-[10px] text-[#5a5a72] font-mono">{filePath}</span>
-        <span className="text-[9px] font-bold text-[#a594f9] bg-[#7c6af71a] px-2 py-0.5 rounded-full">diff</span>
+        <span className="text-xs text-[#ede8ff] font-semibold truncate flex-1">{fileName}</span>
+        <span className="text-[10px] text-[#5a4880] font-mono truncate max-w-[200px]">{filePath}</span>
+        <span className="text-[9px] font-bold text-[#a78bfa] bg-[#8b5cf620] px-2 py-0.5 rounded-full shrink-0">diff</span>
       </div>
       <div className="flex-1 overflow-auto font-mono text-xs leading-5">
         {lines.map((line, i) => {
           let bg = ''
-          let color = 'text-[#5a5a72]'
+          let color = 'text-[#5a4880]'
           let prefix = ''
           if (line.startsWith('+++') || line.startsWith('---')) {
-            color = 'text-[#5a5a72]'
+            color = 'text-[#5a4880]'
           } else if (line.startsWith('+')) {
-            bg = 'bg-[#0b2116]'
+            bg = 'bg-[#0b2118]'
             color = 'text-[#34d399]'
             prefix = line[0]!
           } else if (line.startsWith('-')) {
-            bg = 'bg-[#200f0f]'
+            bg = 'bg-[#200d0d]'
             color = 'text-[#f87171]'
             prefix = line[0]!
           } else if (line.startsWith('@@')) {
-            bg = 'bg-[#12121c]'
-            color = 'text-[#7c6af7]'
+            bg = 'bg-[#1a1528]'
+            color = 'text-[#8b5cf6]'
           } else {
-            color = 'text-[#9191aa]'
+            color = 'text-[#9080c0]'
           }
           return (
             <div key={i} className={`flex ${bg}`}>
-              <span className={`w-6 shrink-0 text-center select-none ${prefix === '+' ? 'text-[#34d39966]' : prefix === '-' ? 'text-[#f8717166]' : 'text-[#2d2d4d]'}`}>
+              <span className={`w-6 shrink-0 text-center select-none ${prefix === '+' ? 'text-[#34d39966]' : prefix === '-' ? 'text-[#f8717166]' : 'text-[#3d3060]'}`}>
                 {prefix || ' '}
               </span>
               <span className={`${color} px-2 whitespace-pre-wrap break-all flex-1`}>{line.slice(1) || ' '}</span>
@@ -117,21 +117,21 @@ export function FilePreview() {
 
   if (!selectedExplorerFile) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center bg-[#0c0c14] gap-3">
-        <div className="w-12 h-12 rounded-2xl bg-[#191927] flex items-center justify-center">
-          <FileText size={22} className="text-[#2d2d4d]" />
+      <div className="flex flex-1 flex-col items-center justify-center bg-[#0d0b14] gap-3">
+        <div className="w-12 h-12 rounded-2xl bg-[#1a1528] flex items-center justify-center">
+          <FileText size={22} className="text-[#3d3060]" />
         </div>
-        <p className="text-xs text-[#5a5a72]">Select a file to edit</p>
+        <p className="text-xs text-[#5a4880]">Select a file to edit</p>
       </div>
     )
   }
 
   return (
-    <div className="flex flex-1 flex-col bg-[#0c0c14] overflow-hidden">
+    <div className="flex flex-1 flex-col bg-[#0d0b14] overflow-hidden">
 
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-[#22223a] shrink-0 bg-[#12121c]">
-        <span className="text-xs text-[#e4e4f0] font-semibold truncate flex-1">
+      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-[#2a2240] shrink-0 bg-[#120f1e]">
+        <span className="text-xs text-[#ede8ff] font-semibold truncate flex-1">
           {selectedExplorerFile}
           {dirty && <span className="ml-1.5 text-[#fbbf24]">●</span>}
         </span>
@@ -145,8 +145,8 @@ export function FilePreview() {
           disabled={!dirty || saving}
           className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
             dirty
-              ? 'bg-[#7c6af7] text-white hover:bg-[#8f7ff9]'
-              : 'text-[#5a5a72] border border-[#22223a] cursor-not-allowed opacity-40'
+              ? 'bg-[#8b5cf6] text-white hover:bg-[#7c3aed]'
+              : 'text-[#5a4880] border border-[#2a2240] cursor-not-allowed opacity-40'
           }`}
           title="Save (Ctrl+S)"
         >

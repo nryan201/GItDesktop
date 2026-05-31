@@ -2,7 +2,7 @@
   "permissions": {
     "allow": [
       "Bash(npm install *)",
-      "Bash(npm run *)",
+      "Skill(frontend-design)",
       "Bash(npx tsc *)"
     ]
   }

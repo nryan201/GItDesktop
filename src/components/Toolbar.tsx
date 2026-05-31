@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { RefreshCw, Upload, GitBranch, FolderOpen, Loader2, X, Check, Download, Settings, Github } from 'lucide-react'
+import { RefreshCw, Upload, Download as PullIcon, GitBranch, FolderOpen, Loader2, X, Check, Download, Settings, Github } from 'lucide-react'
 import { useGitStore } from '../store/useGitStore'
 import { ProfileDialog } from './ProfileDialog'
 import { GitHubDialog } from './GitHubDialog'
@@ -10,7 +10,7 @@ interface Props {
 }
 
 export function Toolbar({ onCloneClick }: Props) {
-  const { currentRepo, currentBranch, isLoading, fetch, push, createBranch, openRepository } =
+  const { currentRepo, currentBranch, isLoading, fetch, push, pull, createBranch, openRepository } =
     useGitStore()
 
   const [showNewBranch, setShowNewBranch] = useState(false)
@@ -30,18 +30,18 @@ export function Toolbar({ onCloneClick }: Props) {
   }
 
   return (
-    <div className="flex items-center gap-1.5 h-12 px-3 bg-[#12121c] border-b border-[#22223a] shrink-0 select-none">
+    <div className="flex items-center gap-1.5 h-12 px-3 bg-[#120f1e] border-b border-[#2a2240] shrink-0 select-none">
       {/* Repo + branch pill */}
-      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#191927] border border-[#2d2d4d] mr-2 max-w-xs">
-        <FolderOpen size={13} className="text-[#7c6af7] shrink-0" />
-        <span className="text-xs font-semibold text-[#e4e4f0] max-w-[120px] truncate">
+      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#1a1528] border border-[#3d3060] mr-2 max-w-xs">
+        <FolderOpen size={13} className="text-[#8b5cf6] shrink-0" />
+        <span className="text-xs font-semibold text-[#ede8ff] max-w-[120px] truncate">
           {repoName ?? 'No repository'}
         </span>
         {currentBranch && (
           <>
-            <span className="text-[#2d2d4d]">/</span>
-            <GitBranch size={12} className="text-[#34d399] shrink-0" />
-            <span className="text-xs text-[#34d399] max-w-[100px] truncate">{currentBranch}</span>
+            <span className="text-[#3d3060]">/</span>
+            <GitBranch size={12} className="text-[#a78bfa] shrink-0" />
+            <span className="text-xs text-[#a78bfa] max-w-[100px] truncate">{currentBranch}</span>
           </>
         )}
       </div>
@@ -67,7 +67,7 @@ export function Toolbar({ onCloneClick }: Props) {
         <span>Clone</span>
       </button>
 
-      <div className="w-px h-4 bg-[#22223a]" />
+      <div className="w-px h-4 bg-[#2a2240]" />
 
       <button
         onClick={() => void fetch()}
@@ -77,6 +77,16 @@ export function Toolbar({ onCloneClick }: Props) {
       >
         {isLoading ? <Loader2 size={13} className="animate-spin" /> : <RefreshCw size={13} />}
         <span>Fetch</span>
+      </button>
+
+      <button
+        onClick={() => void pull()}
+        disabled={!currentRepo || isLoading}
+        className="toolbar-btn"
+        title="Pull from remote"
+      >
+        <PullIcon size={13} />
+        <span>Pull</span>
       </button>
 
       <button
@@ -101,17 +111,17 @@ export function Toolbar({ onCloneClick }: Props) {
               if (e.key === 'Escape') { setShowNewBranch(false); setNewBranchName('') }
             }}
             placeholder="branch-name"
-            className="h-7 px-3 text-xs bg-[#0c0c14] border border-[#7c6af7] rounded-lg text-[#e4e4f0] outline-none w-36 placeholder-[#5a5a72]"
+            className="h-7 px-3 text-xs bg-[#0d0b14] border border-[#8b5cf6] rounded-lg text-[#ede8ff] outline-none w-36 placeholder-[#5a4880]"
           />
           <button
             onClick={() => void handleCreateBranch()}
-            className="p-1.5 rounded-lg text-[#34d399] hover:bg-[#34d3991a] transition-colors"
+            className="p-1.5 rounded-lg text-[#34d399] hover:bg-[#34d39920] transition-all"
           >
             <Check size={13} />
           </button>
           <button
             onClick={() => { setShowNewBranch(false); setNewBranchName('') }}
-            className="p-1.5 rounded-lg text-[#9191aa] hover:bg-[#1f1f31] transition-colors"
+            className="p-1.5 rounded-lg text-[#9080c0] hover:bg-[#1a1528] transition-all"
           >
             <X size={13} />
           </button>
@@ -128,7 +138,7 @@ export function Toolbar({ onCloneClick }: Props) {
         </button>
       )}
 
-      <div className="w-px h-4 bg-[#22223a]" />
+      <div className="w-px h-4 bg-[#2a2240]" />
 
       <button
         onClick={() => setShowProfile(true)}

@@ -24,9 +24,7 @@ function Avatar({ name }: { name: string }) {
     .slice(0, 2)
     .map(n => n[0]?.toUpperCase() ?? '')
     .join('')
-  const palette = [
-    '#7c6af7', '#ec4899', '#34d399', '#f59e0b', '#60a5fa', '#f87171', '#a78bfa',
-  ]
+  const palette = ['#8b5cf6', '#a78bfa', '#7c3aed', '#6d28d9', '#c4b5fd', '#ddd6fe', '#4c1d95']
   const color = palette[(name.charCodeAt(0) ?? 0) % palette.length]!
 
   return (
@@ -47,38 +45,36 @@ function CommitRow({ commit, selected, onClick }: {
   return (
     <button
       onClick={onClick}
-      className={`w-full text-left transition-all flex gap-0 group ${
-        selected ? '' : ''
-      }`}
+      className={`w-full text-left transition-all flex gap-0 group`}
     >
       {/* Timeline column */}
       <div className="flex flex-col items-center w-8 shrink-0 pt-3 pb-0">
         <div className={`w-2 h-2 rounded-full shrink-0 transition-colors ${
-          selected ? 'bg-[#7c6af7]' : 'bg-[#2d2d4d] group-hover:bg-[#3d3d60]'
+          selected ? 'bg-[#8b5cf6]' : 'bg-[#3d3060] group-hover:bg-[#4d3f70]'
         }`} />
-        <div className="w-px flex-1 bg-[#22223a] mt-1" />
+        <div className="w-px flex-1 bg-[#2a2240] mt-1" />
       </div>
 
       {/* Content */}
-      <div className={`flex-1 min-w-0 py-2.5 pr-3 border-b border-[#22223a] transition-colors ${
-        selected ? 'bg-[#7c6af71a]' : 'hover:bg-[#1f1f31]'
+      <div className={`flex-1 min-w-0 py-2.5 pr-3 border-b border-[#2a2240] transition-colors ${
+        selected ? 'bg-[#8b5cf615]' : 'hover:bg-[#1a1528]'
       }`}>
         <div className="flex items-start gap-2 mb-1.5">
           <Avatar name={commit.author_name} />
           <p className={`text-xs leading-snug flex-1 min-w-0 line-clamp-2 ${
-            selected ? 'text-[#e4e4f0]' : 'text-[#c9c9e0]'
+            selected ? 'text-[#ede8ff]' : 'text-[#c8c0e8]'
           }`}>
             {commit.message}
           </p>
         </div>
         <div className="flex items-center gap-2 pl-8">
-          <span className="font-mono text-[10px] text-[#a594f9] bg-[#7c6af71a] px-1.5 py-0.5 rounded-md">
+          <span className="font-mono text-[10px] text-[#a78bfa] bg-[#8b5cf620] px-1.5 py-0.5 rounded-md">
             {commit.shortHash}
           </span>
-          <span className="text-[10px] text-[#9191aa] truncate flex-1">
+          <span className="text-[10px] text-[#9080c0] truncate flex-1">
             {commit.author_name}
           </span>
-          <span className="text-[10px] text-[#5a5a72] shrink-0">
+          <span className="text-[10px] text-[#5a4880] shrink-0">
             {relativeDate(commit.date)}
           </span>
         </div>
@@ -94,46 +90,46 @@ export function CommitHistory({ width }: { width?: number }) {
 
   if (!currentRepo) {
     return (
-      <div className="shrink-0 flex flex-col items-center justify-center bg-[#0c0c14] border-r border-[#22223a]" style={{ width: width ?? 320 }}>
-        <div className="w-12 h-12 rounded-2xl bg-[#191927] flex items-center justify-center mb-3">
-          <GitCommit size={22} className="text-[#2d2d4d]" />
+      <div className="shrink-0 flex flex-col items-center justify-center bg-[#0d0b14] border-r border-[#2a2240]" style={{ width: width ?? 320 }}>
+        <div className="w-12 h-12 rounded-2xl bg-[#1a1528] flex items-center justify-center mb-3">
+          <GitCommit size={22} className="text-[#3d3060]" />
         </div>
-        <p className="text-xs text-[#5a5a72]">No repository selected</p>
+        <p className="text-xs text-[#5a4880]">No repository selected</p>
       </div>
     )
   }
 
   return (
-    <div className="shrink-0 flex flex-col bg-[#0c0c14] border-r border-[#22223a] overflow-hidden" style={{ width: width ?? 320 }}>
+    <div className="shrink-0 flex flex-col bg-[#0d0b14] border-r border-[#2a2240] overflow-hidden" style={{ width: width ?? 320 }}>
       {/* Tabs */}
-      <div className="flex border-b border-[#22223a] shrink-0 px-2 pt-1">
+      <div className="flex border-b border-[#2a2240] shrink-0 px-2 pt-1">
         <button
           onClick={() => setTab('history')}
-          className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-all rounded-t-lg border-b-2 ${
+          className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-all border-b-2 ${
             tab === 'history'
-              ? 'border-[#7c6af7] text-[#e4e4f0]'
-              : 'border-transparent text-[#5a5a72] hover:text-[#9191aa]'
+              ? 'border-[#8b5cf6] text-[#ede8ff]'
+              : 'border-transparent text-[#5a4880] hover:text-[#9080c0]'
           }`}
         >
           <GitCommit size={12} /> History
         </button>
         <button
           onClick={() => setTab('changes')}
-          className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-all rounded-t-lg border-b-2 ${
+          className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-all border-b-2 ${
             tab === 'changes'
-              ? 'border-[#7c6af7] text-[#e4e4f0]'
-              : 'border-transparent text-[#5a5a72] hover:text-[#9191aa]'
+              ? 'border-[#8b5cf6] text-[#ede8ff]'
+              : 'border-transparent text-[#5a4880] hover:text-[#9080c0]'
           }`}
         >
           Changes
           {changesCount > 0 && (
-            <span className="bg-[#fbbf24] text-[#0c0c14] text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none">
+            <span className="bg-[#8b5cf6] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none">
               {changesCount}
             </span>
           )}
         </button>
         {currentBranch && tab === 'history' && (
-          <span className="ml-auto self-center mr-2 text-[10px] font-medium text-[#34d399] bg-[#34d3991a] px-2 py-0.5 rounded-full truncate max-w-[90px]">
+          <span className="ml-auto self-center mr-2 text-[10px] font-medium text-[#a78bfa] bg-[#8b5cf620] px-2 py-0.5 rounded-full truncate max-w-[90px]">
             {currentBranch}
           </span>
         )}
@@ -145,8 +141,8 @@ export function CommitHistory({ width }: { width?: number }) {
       <div className={`flex-1 overflow-y-auto ${tab === 'changes' ? 'hidden' : ''}`}>
         {commits.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full gap-2">
-            <GitCommit size={20} className="text-[#2d2d4d]" />
-            <p className="text-xs text-[#5a5a72]">No commits found</p>
+            <GitCommit size={20} className="text-[#3d3060]" />
+            <p className="text-xs text-[#5a4880]">No commits found</p>
           </div>
         ) : (
           commits.map(commit => (
@@ -162,8 +158,8 @@ export function CommitHistory({ width }: { width?: number }) {
 
       {/* Footer */}
       {commits.length > 0 && tab === 'history' && (
-        <div className="px-4 py-2 border-t border-[#22223a] shrink-0">
-          <span className="text-[10px] text-[#5a5a72] font-medium">{commits.length} commits</span>
+        <div className="px-4 py-2 border-t border-[#2a2240] shrink-0">
+          <span className="text-[10px] text-[#5a4880] font-medium">{commits.length} commits</span>
         </div>
       )}
     </div>

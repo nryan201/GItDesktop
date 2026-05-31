@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron'
+import { app, BrowserWindow, ipcMain, dialog, shell, Menu } from 'electron'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import fs from 'node:fs'
@@ -231,6 +231,7 @@ function createWindow(): void {
 }
 
 app.whenReady().then(() => {
+  Menu.setApplicationMenu(null)
   createWindow()
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
@@ -453,6 +454,24 @@ ipcMain.handle('git:commit', async (_e, repoPath: string, message: string) => {
   }
 })
 
+ipcMain.handle('git:stash', async (_e, repoPath: string) => {
+  try {
+    await simpleGit(repoPath).stash(['push', '-u', '-m', 'git-desktop auto-stash'])
+    return { success: true }
+  } catch (e) {
+    return { success: false, error: String(e) }
+  }
+})
+
+ipcMain.handle('git:stash-pop', async (_e, repoPath: string) => {
+  try {
+    await simpleGit(repoPath).stash(['pop'])
+    return { success: true }
+  } catch (e) {
+    return { success: false, error: String(e) }
+  }
+})
+
 ipcMain.handle('git:fetch', async (_e, repoPath: string) => {
   try {
     const git = simpleGit(repoPath)
@@ -485,6 +504,26 @@ ipcMain.handle('git:push', async (_e, repoPath: string) => {
       }
     }
     await git.push()
+    return { success: true }
+  } catch (e) {
+    return { success: false, error: String(e) }
+  }
+})
+
+ipcMain.handle('git:pull', async (_e, repoPath: string) => {
+  try {
+    const git = simpleGit(repoPath)
+    const token = getAuthToken()
+    if (token) {
+      const remoteUrl = (await git.remote(['get-url', 'origin']))?.trim()
+      if (remoteUrl) {
+        const status = await git.status()
+        const branch = status.current ?? 'main'
+        await git.raw(['pull', injectToken(remoteUrl, token), branch])
+        return { success: true }
+      }
+    }
+    await git.pull()
     return { success: true }
   } catch (e) {
     return { success: false, error: String(e) }

@@ -35,6 +35,9 @@ declare global {
 
       fetch: (repoPath: string) => Promise<{ success: boolean; error?: string }>
       push: (repoPath: string) => Promise<{ success: boolean; error?: string }>
+      pull: (repoPath: string) => Promise<{ success: boolean; error?: string }>
+      stash: (repoPath: string) => Promise<{ success: boolean; error?: string }>
+      stashPop: (repoPath: string) => Promise<{ success: boolean; error?: string }>
 
       // File system
       getFileTree: (repoPath: string) => Promise<FileTreeNode[] | { error: string }>

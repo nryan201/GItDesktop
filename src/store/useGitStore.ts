@@ -45,6 +45,9 @@ interface GitState {
   selectFile: (file: string) => Promise<void>
   fetch: () => Promise<void>
   push: () => Promise<void>
+  pull: () => Promise<void>
+  stash: () => Promise<void>
+  stashPop: () => Promise<void>
   createBranch: (name: string) => Promise<void>
   loadFileTree: () => Promise<void>
   selectExplorerFile: (filePath: string) => Promise<void>
@@ -235,10 +238,13 @@ export const useGitStore = create<GitState>()((set, get) => ({
     try {
       const result = await window.gitAPI.checkoutBranch(currentRepo, branchName)
       if (!result.success) {
+        const isConflict = result.error?.includes('would be overwritten by checkout') || result.error?.includes('would be overwritten by merge')
         set({
           notification: {
             type: 'error',
-            message: result.error ?? 'Checkout failed',
+            message: isConflict
+              ? 'Stash or commit your changes first (Changes tab → Stash), then switch branches.'
+              : result.error ?? 'Checkout failed',
           },
         })
         return
@@ -395,6 +401,79 @@ export const useGitStore = create<GitState>()((set, get) => ({
           message: `Push failed: ${String(e)}`,
         },
       })
+    } finally {
+      set({ isLoading: false })
+    }
+  },
+
+  pull: async () => {
+    const { currentRepo } = get()
+    if (!currentRepo) return
+
+    set({
+      isLoading: true,
+      notification: { type: 'info', message: 'Pulling from remote…' },
+    })
+
+    try {
+      const result = await window.gitAPI.pull(currentRepo)
+      if (result.success) {
+        const branches = await window.gitAPI.getBranches(currentRepo)
+        const currentBranch = branches.find(b => b.current)?.name ?? null
+        const commits = await window.gitAPI.getCommits(currentRepo, currentBranch ?? undefined)
+        set({ branches, currentBranch, commits, notification: { type: 'success', message: 'Pull complete' } })
+        await get().refreshStatus()
+      } else {
+        const isConflict = result.error?.includes('would be overwritten by merge') || result.error?.includes('overwritten by checkout')
+        set({
+          notification: {
+            type: 'error',
+            message: isConflict
+              ? 'Stash or commit your local changes first, then pull again.'
+              : result.error ?? 'Pull failed',
+          },
+        })
+      }
+    } catch (e) {
+      set({ notification: { type: 'error', message: `Pull failed: ${String(e)}` } })
+    } finally {
+      set({ isLoading: false })
+    }
+  },
+
+  stash: async () => {
+    const { currentRepo } = get()
+    if (!currentRepo) return
+    set({ isLoading: true })
+    try {
+      const result = await window.gitAPI.stash(currentRepo)
+      if (result.success) {
+        set({ notification: { type: 'success', message: 'Changes stashed' } })
+        await get().refreshStatus()
+      } else {
+        set({ notification: { type: 'error', message: result.error ?? 'Stash failed' } })
+      }
+    } catch (e) {
+      set({ notification: { type: 'error', message: `Stash failed: ${String(e)}` } })
+    } finally {
+      set({ isLoading: false })
+    }
+  },
+
+  stashPop: async () => {
+    const { currentRepo } = get()
+    if (!currentRepo) return
+    set({ isLoading: true })
+    try {
+      const result = await window.gitAPI.stashPop(currentRepo)
+      if (result.success) {
+        set({ notification: { type: 'success', message: 'Stash restored' } })
+        await get().refreshStatus()
+      } else {
+        set({ notification: { type: 'error', message: result.error ?? 'Stash pop failed' } })
+      }
+    } catch (e) {
+      set({ notification: { type: 'error', message: `Stash pop failed: ${String(e)}` } })
     } finally {
       set({ isLoading: false })
     }

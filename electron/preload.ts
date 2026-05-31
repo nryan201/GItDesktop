@@ -45,6 +45,9 @@ contextBridge.exposeInMainWorld('gitAPI', {
   // Remote
   fetch: (repoPath: string) => ipcRenderer.invoke('git:fetch', repoPath),
   push: (repoPath: string) => ipcRenderer.invoke('git:push', repoPath),
+  pull: (repoPath: string) => ipcRenderer.invoke('git:pull', repoPath),
+  stash: (repoPath: string) => ipcRenderer.invoke('git:stash', repoPath),
+  stashPop: (repoPath: string) => ipcRenderer.invoke('git:stash-pop', repoPath),
 
   // File system
   getFileTree: (repoPath: string) => ipcRenderer.invoke('fs:get-tree', repoPath),
