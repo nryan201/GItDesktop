@@ -25,14 +25,14 @@ function Avatar({ name }: { name: string }) {
     .map(n => n[0]?.toUpperCase() ?? '')
     .join('')
   const palette = [
-    'bg-blue-600', 'bg-violet-600', 'bg-emerald-600',
-    'bg-orange-600', 'bg-pink-600', 'bg-teal-600', 'bg-rose-600',
+    '#7c6af7', '#ec4899', '#34d399', '#f59e0b', '#60a5fa', '#f87171', '#a78bfa',
   ]
   const color = palette[(name.charCodeAt(0) ?? 0) % palette.length]!
 
   return (
     <div
-      className={`${color} w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0`}
+      style={{ backgroundColor: color + '22', borderColor: color + '55', color }}
+      className="w-6 h-6 rounded-lg border flex items-center justify-center text-[10px] font-bold shrink-0"
     >
       {initials}
     </div>
@@ -47,30 +47,41 @@ function CommitRow({ commit, selected, onClick }: {
   return (
     <button
       onClick={onClick}
-      className={`w-full text-left px-3 py-2.5 border-b border-[#21262d] transition-colors flex flex-col gap-1 ${
-        selected
-          ? 'bg-[#388bfd1a] border-l-2 border-l-[#58a6ff]'
-          : 'hover:bg-[#21262d]'
+      className={`w-full text-left transition-all flex gap-0 group ${
+        selected ? '' : ''
       }`}
     >
-      <div className="flex items-start gap-2">
-        <Avatar name={commit.author_name} />
-        <p className={`text-xs leading-snug flex-1 min-w-0 line-clamp-2 ${
-          selected ? 'text-[#e6edf3]' : 'text-[#c9d1d9]'
-        }`}>
-          {commit.message}
-        </p>
+      {/* Timeline column */}
+      <div className="flex flex-col items-center w-8 shrink-0 pt-3 pb-0">
+        <div className={`w-2 h-2 rounded-full shrink-0 transition-colors ${
+          selected ? 'bg-[#7c6af7]' : 'bg-[#2d2d4d] group-hover:bg-[#3d3d60]'
+        }`} />
+        <div className="w-px flex-1 bg-[#22223a] mt-1" />
       </div>
-      <div className="flex items-center gap-2 pl-8">
-        <span className="font-mono text-[10px] text-[#58a6ff] bg-[#388bfd1a] px-1.5 py-0.5 rounded">
-          {commit.shortHash}
-        </span>
-        <span className="text-[10px] text-[#8b949e] truncate flex-1">
-          {commit.author_name}
-        </span>
-        <span className="text-[10px] text-[#6e7681] shrink-0">
-          {relativeDate(commit.date)}
-        </span>
+
+      {/* Content */}
+      <div className={`flex-1 min-w-0 py-2.5 pr-3 border-b border-[#22223a] transition-colors ${
+        selected ? 'bg-[#7c6af71a]' : 'hover:bg-[#1f1f31]'
+      }`}>
+        <div className="flex items-start gap-2 mb-1.5">
+          <Avatar name={commit.author_name} />
+          <p className={`text-xs leading-snug flex-1 min-w-0 line-clamp-2 ${
+            selected ? 'text-[#e4e4f0]' : 'text-[#c9c9e0]'
+          }`}>
+            {commit.message}
+          </p>
+        </div>
+        <div className="flex items-center gap-2 pl-8">
+          <span className="font-mono text-[10px] text-[#a594f9] bg-[#7c6af71a] px-1.5 py-0.5 rounded-md">
+            {commit.shortHash}
+          </span>
+          <span className="text-[10px] text-[#9191aa] truncate flex-1">
+            {commit.author_name}
+          </span>
+          <span className="text-[10px] text-[#5a5a72] shrink-0">
+            {relativeDate(commit.date)}
+          </span>
+        </div>
       </div>
     </button>
   )
@@ -83,44 +94,46 @@ export function CommitHistory({ width }: { width?: number }) {
 
   if (!currentRepo) {
     return (
-      <div className="shrink-0 flex flex-col items-center justify-center bg-[#0d1117] border-r border-[#30363d]" style={{ width: width ?? 320 }}>
-        <GitCommit size={28} className="text-[#30363d] mb-2" />
-        <p className="text-xs text-[#8b949e]">No repository selected</p>
+      <div className="shrink-0 flex flex-col items-center justify-center bg-[#0c0c14] border-r border-[#22223a]" style={{ width: width ?? 320 }}>
+        <div className="w-12 h-12 rounded-2xl bg-[#191927] flex items-center justify-center mb-3">
+          <GitCommit size={22} className="text-[#2d2d4d]" />
+        </div>
+        <p className="text-xs text-[#5a5a72]">No repository selected</p>
       </div>
     )
   }
 
   return (
-    <div className="shrink-0 flex flex-col bg-[#0d1117] border-r border-[#30363d] overflow-hidden" style={{ width: width ?? 320 }}>
+    <div className="shrink-0 flex flex-col bg-[#0c0c14] border-r border-[#22223a] overflow-hidden" style={{ width: width ?? 320 }}>
       {/* Tabs */}
-      <div className="flex border-b border-[#30363d] shrink-0">
+      <div className="flex border-b border-[#22223a] shrink-0 px-2 pt-1">
         <button
           onClick={() => setTab('history')}
-          className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium transition-colors border-b-2 ${
+          className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-all rounded-t-lg border-b-2 ${
             tab === 'history'
-              ? 'border-[#58a6ff] text-[#e6edf3]'
-              : 'border-transparent text-[#8b949e] hover:text-[#e6edf3]'
+              ? 'border-[#7c6af7] text-[#e4e4f0]'
+              : 'border-transparent text-[#5a5a72] hover:text-[#9191aa]'
           }`}
         >
           <GitCommit size={12} /> History
         </button>
         <button
           onClick={() => setTab('changes')}
-          className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium transition-colors border-b-2 ${
+          className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-all rounded-t-lg border-b-2 ${
             tab === 'changes'
-              ? 'border-[#58a6ff] text-[#e6edf3]'
-              : 'border-transparent text-[#8b949e] hover:text-[#e6edf3]'
+              ? 'border-[#7c6af7] text-[#e4e4f0]'
+              : 'border-transparent text-[#5a5a72] hover:text-[#9191aa]'
           }`}
         >
           Changes
           {changesCount > 0 && (
-            <span className="bg-[#d29922] text-black text-[9px] font-bold px-1 py-0.5 rounded-full leading-none">
+            <span className="bg-[#fbbf24] text-[#0c0c14] text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none">
               {changesCount}
             </span>
           )}
         </button>
         {currentBranch && tab === 'history' && (
-          <span className="ml-auto self-center mr-3 text-[10px] text-[#3fb950] bg-[#238636]/20 px-1.5 py-0.5 rounded-full truncate max-w-[100px]">
+          <span className="ml-auto self-center mr-2 text-[10px] font-medium text-[#34d399] bg-[#34d3991a] px-2 py-0.5 rounded-full truncate max-w-[90px]">
             {currentBranch}
           </span>
         )}
@@ -131,8 +144,9 @@ export function CommitHistory({ width }: { width?: number }) {
       {/* Commit list — hidden when Changes tab is active */}
       <div className={`flex-1 overflow-y-auto ${tab === 'changes' ? 'hidden' : ''}`}>
         {commits.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full">
-            <p className="text-xs text-[#8b949e]">No commits found</p>
+          <div className="flex flex-col items-center justify-center h-full gap-2">
+            <GitCommit size={20} className="text-[#2d2d4d]" />
+            <p className="text-xs text-[#5a5a72]">No commits found</p>
           </div>
         ) : (
           commits.map(commit => (
@@ -148,8 +162,8 @@ export function CommitHistory({ width }: { width?: number }) {
 
       {/* Footer */}
       {commits.length > 0 && tab === 'history' && (
-        <div className="px-3 py-1.5 border-t border-[#30363d] shrink-0">
-          <span className="text-[10px] text-[#6e7681]">{commits.length} commits</span>
+        <div className="px-4 py-2 border-t border-[#22223a] shrink-0">
+          <span className="text-[10px] text-[#5a5a72] font-medium">{commits.length} commits</span>
         </div>
       )}
     </div>

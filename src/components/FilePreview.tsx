@@ -18,34 +18,44 @@ function getLanguage(filePath: string): string {
 
 function DiffView({ filePath, diff }: { filePath: string; diff: string }) {
   const lines = diff.split('\n')
+  const fileName = filePath.split(/[\\/]/).pop() ?? filePath
   return (
-    <div className="flex flex-1 flex-col bg-[#0d1117] overflow-hidden">
-      <div className="flex items-center gap-2 px-4 py-2 border-b border-[#30363d] shrink-0 bg-[#161b22]">
-        <GitBranch size={13} className="text-[#58a6ff] shrink-0" />
-        <span className="text-xs text-[#e6edf3] font-medium truncate flex-1">{filePath}</span>
-        <span className="text-[10px] text-[#8b949e]">diff</span>
+    <div className="flex flex-1 flex-col bg-[#0c0c14] overflow-hidden">
+      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-[#22223a] shrink-0 bg-[#12121c]">
+        <div className="w-5 h-5 rounded-md bg-[#7c6af71a] flex items-center justify-center shrink-0">
+          <GitBranch size={11} className="text-[#a594f9]" />
+        </div>
+        <span className="text-xs text-[#e4e4f0] font-semibold truncate flex-1">{fileName}</span>
+        <span className="text-[10px] text-[#5a5a72] font-mono">{filePath}</span>
+        <span className="text-[9px] font-bold text-[#a594f9] bg-[#7c6af71a] px-2 py-0.5 rounded-full">diff</span>
       </div>
       <div className="flex-1 overflow-auto font-mono text-xs leading-5">
         {lines.map((line, i) => {
           let bg = ''
-          let color = 'text-[#8b949e]'
+          let color = 'text-[#5a5a72]'
+          let prefix = ''
           if (line.startsWith('+++') || line.startsWith('---')) {
-            color = 'text-[#8b949e]'
+            color = 'text-[#5a5a72]'
           } else if (line.startsWith('+')) {
-            bg = 'bg-[#0d2b12]'
-            color = 'text-[#3fb950]'
+            bg = 'bg-[#0b2116]'
+            color = 'text-[#34d399]'
+            prefix = line[0]!
           } else if (line.startsWith('-')) {
-            bg = 'bg-[#2d0d0d]'
-            color = 'text-[#f85149]'
+            bg = 'bg-[#200f0f]'
+            color = 'text-[#f87171]'
+            prefix = line[0]!
           } else if (line.startsWith('@@')) {
-            bg = 'bg-[#1f2937]'
-            color = 'text-[#58a6ff]'
+            bg = 'bg-[#12121c]'
+            color = 'text-[#7c6af7]'
           } else {
-            color = 'text-[#c9d1d9]'
+            color = 'text-[#9191aa]'
           }
           return (
-            <div key={i} className={`flex ${bg} px-4 whitespace-pre-wrap break-all`}>
-              <span className={color}>{line || ' '}</span>
+            <div key={i} className={`flex ${bg}`}>
+              <span className={`w-6 shrink-0 text-center select-none ${prefix === '+' ? 'text-[#34d39966]' : prefix === '-' ? 'text-[#f8717166]' : 'text-[#2d2d4d]'}`}>
+                {prefix || ' '}
+              </span>
+              <span className={`${color} px-2 whitespace-pre-wrap break-all flex-1`}>{line.slice(1) || ' '}</span>
             </div>
           )
         })}
@@ -107,34 +117,36 @@ export function FilePreview() {
 
   if (!selectedExplorerFile) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center bg-[#0d1117]">
-        <FileText size={32} className="text-[#30363d] mb-2" />
-        <p className="text-xs text-[#8b949e]">Select a file to edit</p>
+      <div className="flex flex-1 flex-col items-center justify-center bg-[#0c0c14] gap-3">
+        <div className="w-12 h-12 rounded-2xl bg-[#191927] flex items-center justify-center">
+          <FileText size={22} className="text-[#2d2d4d]" />
+        </div>
+        <p className="text-xs text-[#5a5a72]">Select a file to edit</p>
       </div>
     )
   }
 
   return (
-    <div className="flex flex-1 flex-col bg-[#0d1117] overflow-hidden">
+    <div className="flex flex-1 flex-col bg-[#0c0c14] overflow-hidden">
 
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-2 border-b border-[#30363d] shrink-0 bg-[#161b22]">
-        <span className="text-xs text-[#e6edf3] font-medium truncate flex-1">
+      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-[#22223a] shrink-0 bg-[#12121c]">
+        <span className="text-xs text-[#e4e4f0] font-semibold truncate flex-1">
           {selectedExplorerFile}
-          {dirty && <span className="ml-1.5 text-[#d29922]">●</span>}
+          {dirty && <span className="ml-1.5 text-[#fbbf24]">●</span>}
         </span>
 
         {saveError && (
-          <span className="text-[10px] text-[#f85149]">{saveError}</span>
+          <span className="text-[10px] text-[#f87171]">{saveError}</span>
         )}
 
         <button
           onClick={() => void handleSave()}
           disabled={!dirty || saving}
-          className={`flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded transition-colors ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
             dirty
-              ? 'bg-[#238636] text-white hover:bg-[#2ea043]'
-              : 'text-[#8b949e] border border-[#30363d] cursor-not-allowed opacity-50'
+              ? 'bg-[#7c6af7] text-white hover:bg-[#8f7ff9]'
+              : 'text-[#5a5a72] border border-[#22223a] cursor-not-allowed opacity-40'
           }`}
           title="Save (Ctrl+S)"
         >

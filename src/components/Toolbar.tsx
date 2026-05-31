@@ -30,18 +30,18 @@ export function Toolbar({ onCloneClick }: Props) {
   }
 
   return (
-    <div className="flex items-center gap-2 h-12 px-4 bg-[#161b22] border-b border-[#30363d] shrink-0 select-none">
-      {/* Repo indicator */}
-      <div className="flex items-center gap-2 mr-2">
-        <FolderOpen size={14} className="text-[#58a6ff]" />
-        <span className="text-sm font-medium text-[#e6edf3] max-w-[160px] truncate">
+    <div className="flex items-center gap-1.5 h-12 px-3 bg-[#12121c] border-b border-[#22223a] shrink-0 select-none">
+      {/* Repo + branch pill */}
+      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#191927] border border-[#2d2d4d] mr-2 max-w-xs">
+        <FolderOpen size={13} className="text-[#7c6af7] shrink-0" />
+        <span className="text-xs font-semibold text-[#e4e4f0] max-w-[120px] truncate">
           {repoName ?? 'No repository'}
         </span>
         {currentBranch && (
           <>
-            <span className="text-[#30363d]">/</span>
-            <GitBranch size={13} className="text-[#3fb950]" />
-            <span className="text-sm text-[#3fb950] max-w-[140px] truncate">{currentBranch}</span>
+            <span className="text-[#2d2d4d]">/</span>
+            <GitBranch size={12} className="text-[#34d399] shrink-0" />
+            <span className="text-xs text-[#34d399] max-w-[100px] truncate">{currentBranch}</span>
           </>
         )}
       </div>
@@ -54,7 +54,7 @@ export function Toolbar({ onCloneClick }: Props) {
         className="toolbar-btn"
         title="Open local repository"
       >
-        <FolderOpen size={14} />
+        <FolderOpen size={13} />
         <span>Open</span>
       </button>
 
@@ -63,11 +63,11 @@ export function Toolbar({ onCloneClick }: Props) {
         className="toolbar-btn"
         title="Clone remote repository"
       >
-        <Download size={14} />
+        <Download size={13} />
         <span>Clone</span>
       </button>
 
-      <div className="w-px h-5 bg-[#30363d]" />
+      <div className="w-px h-4 bg-[#22223a]" />
 
       <button
         onClick={() => void fetch()}
@@ -75,7 +75,7 @@ export function Toolbar({ onCloneClick }: Props) {
         className="toolbar-btn"
         title="Fetch from remote"
       >
-        {isLoading ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
+        {isLoading ? <Loader2 size={13} className="animate-spin" /> : <RefreshCw size={13} />}
         <span>Fetch</span>
       </button>
 
@@ -85,7 +85,7 @@ export function Toolbar({ onCloneClick }: Props) {
         className="toolbar-btn"
         title="Push to remote"
       >
-        <Upload size={14} />
+        <Upload size={13} />
         <span>Push</span>
       </button>
 
@@ -101,17 +101,17 @@ export function Toolbar({ onCloneClick }: Props) {
               if (e.key === 'Escape') { setShowNewBranch(false); setNewBranchName('') }
             }}
             placeholder="branch-name"
-            className="h-7 px-2 text-xs bg-[#0d1117] border border-[#58a6ff] rounded text-[#e6edf3] outline-none w-36"
+            className="h-7 px-3 text-xs bg-[#0c0c14] border border-[#7c6af7] rounded-lg text-[#e4e4f0] outline-none w-36 placeholder-[#5a5a72]"
           />
           <button
             onClick={() => void handleCreateBranch()}
-            className="p-1.5 rounded text-[#3fb950] hover:bg-[#238636]/20 transition-colors"
+            className="p-1.5 rounded-lg text-[#34d399] hover:bg-[#34d3991a] transition-colors"
           >
             <Check size={13} />
           </button>
           <button
             onClick={() => { setShowNewBranch(false); setNewBranchName('') }}
-            className="p-1.5 rounded text-[#8b949e] hover:bg-[#30363d] transition-colors"
+            className="p-1.5 rounded-lg text-[#9191aa] hover:bg-[#1f1f31] transition-colors"
           >
             <X size={13} />
           </button>
@@ -123,19 +123,19 @@ export function Toolbar({ onCloneClick }: Props) {
           className="toolbar-btn"
           title="Create new branch"
         >
-          <GitBranch size={14} />
-          <span>New Branch</span>
+          <GitBranch size={13} />
+          <span>Branch</span>
         </button>
       )}
 
-      <div className="w-px h-5 bg-[#30363d]" />
+      <div className="w-px h-4 bg-[#22223a]" />
 
       <button
         onClick={() => setShowProfile(true)}
         className="toolbar-btn"
         title="Git profile & token"
       >
-        <Settings size={14} />
+        <Settings size={13} />
         <span>Profile</span>
       </button>
 
@@ -146,7 +146,7 @@ export function Toolbar({ onCloneClick }: Props) {
           className="toolbar-btn"
           title="Publish to GitHub"
         >
-          <Upload size={14} />
+          <Upload size={13} />
           <span>Publish</span>
         </button>
       )}
@@ -156,7 +156,7 @@ export function Toolbar({ onCloneClick }: Props) {
         className="toolbar-btn"
         title="GitHub"
       >
-        <Github size={14} />
+        <Github size={13} />
         <span>GitHub</span>
       </button>
 
