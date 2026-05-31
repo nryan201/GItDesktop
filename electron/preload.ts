@@ -33,6 +33,15 @@ contextBridge.exposeInMainWorld('gitAPI', {
   getDiff: (repoPath: string, hash: string, file: string) =>
     ipcRenderer.invoke('git:get-diff', repoPath, hash, file),
 
+  // Status & staging
+  getWorkingDiff: (repoPath: string, filePath: string, isUntracked: boolean, isStaged: boolean) =>
+    ipcRenderer.invoke('git:get-working-diff', repoPath, filePath, isUntracked, isStaged),
+  getStatus: (repoPath: string) => ipcRenderer.invoke('git:get-status', repoPath),
+  stageFile: (repoPath: string, filePath: string) => ipcRenderer.invoke('git:stage-file', repoPath, filePath),
+  unstageFile: (repoPath: string, filePath: string) => ipcRenderer.invoke('git:unstage-file', repoPath, filePath),
+  stageAll: (repoPath: string) => ipcRenderer.invoke('git:stage-all', repoPath),
+  commitChanges: (repoPath: string, message: string) => ipcRenderer.invoke('git:commit', repoPath, message),
+
   // Remote
   fetch: (repoPath: string) => ipcRenderer.invoke('git:fetch', repoPath),
   push: (repoPath: string) => ipcRenderer.invoke('git:push', repoPath),
@@ -40,6 +49,7 @@ contextBridge.exposeInMainWorld('gitAPI', {
   // File system
   getFileTree: (repoPath: string) => ipcRenderer.invoke('fs:get-tree', repoPath),
   readFile: (repoPath: string, relativeFilePath: string) => ipcRenderer.invoke('fs:read-file', repoPath, relativeFilePath),
+  writeFile: (repoPath: string, relativeFilePath: string, content: string) => ipcRenderer.invoke('fs:write-file', repoPath, relativeFilePath, content),
 
   // Profile
   getProfile: () => ipcRenderer.invoke('profile:get'),

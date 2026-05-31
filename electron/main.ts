@@ -6,12 +6,9 @@ import simpleGit from 'simple-git'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-// Keep a reference to send progress events to the renderer
+
 let mainWindow: BrowserWindow | null = null
 
-// ─── GitHub OAuth ─────────────────────────────────────────────────────────────
-// Create a free OAuth App at: github.com/settings/developers → "New OAuth App"
-// Set any Homepage/Callback URL (e.g. http://localhost) — not used for Device Flow
 const GITHUB_CLIENT_ID = 'Ov23linFDelDS9YOcuAz'
 
 ipcMain.handle('shell:open-external', (_e, url: string) => shell.openExternal(url))
@@ -70,37 +67,51 @@ ipcMain.handle('git:publish', async (_e, repoPath: string, remoteUrl: string) =>
   const git = simpleGit(repoPath)
   const token = getAuthToken()
   const authUrl = injectToken(remoteUrl, token)
+  const { name, email } = loadProfile()
 
   try {
-    // If no commits yet, stage everything and make an initial commit
-    let branch = 'main'
-    let hasCommits = true
-    try {
-      await git.log()
-    } catch {
-      hasCommits = false
+    // 1. Ensure .gitignore excludes large/generated dirs
+    const gitignorePath = path.join(repoPath, '.gitignore')
+    const ignoreEntries = ['node_modules', 'dist', 'dist-electron', 'release', '*.log']
+    let existingIgnore = ''
+    try { existingIgnore = fs.readFileSync(gitignorePath, 'utf-8') } catch { /* no gitignore yet */ }
+    const toAdd = ignoreEntries.filter(e => !existingIgnore.includes(e))
+    if (toAdd.length > 0) {
+      fs.writeFileSync(gitignorePath, existingIgnore + (existingIgnore.endsWith('\n') ? '' : '\n') + toAdd.join('\n') + '\n')
     }
 
+    // 2. Set git identity
+    if (name) await git.addConfig('user.name', name)
+    if (email) await git.addConfig('user.email', email)
+
+    // 3. Check for existing commits
+    let hasCommits = true
+    try { await git.log() } catch { hasCommits = false }
+
     if (!hasCommits) {
-      try {
-        const { name, email } = loadProfile()
-        if (name) await git.addConfig('user.name', name)
-        if (email) await git.addConfig('user.email', email)
-        await git.add('.')
-        await git.commit('Initial commit')
-      } catch (e) {
-        return { success: false, error: String(e) }
+      // Fresh repo — just add everything (gitignore already excludes large files)
+      await git.add('.')
+      await git.commit('Initial commit')
+    } else {
+      // Existing commits — untrack any large dirs that snuck in
+      const largeDirs = ['release', 'dist-electron']
+      for (const dir of largeDirs) {
+        if (fs.existsSync(path.join(repoPath, dir))) {
+          try { await git.raw(['rm', '-r', '--cached', '--ignore-unmatch', dir]) } catch { /* ignore */ }
+        }
+      }
+      // If untracking created staged changes, amend the last commit
+      const staged = await git.diff(['--cached', '--name-only'])
+      if (staged.trim()) {
+        await git.raw(['commit', '--amend', '--no-edit'])
       }
     }
 
-    try {
-      const status = await git.status()
-      branch = status.current ?? 'main'
-    } catch (e) {
-      return { success: false, error: String(e) }
-    }
+    // 4. Get current branch
+    const status = await git.status()
+    const branch = status.current ?? 'main'
 
-    // Add or update origin with plain URL
+    // 5. Add/update origin and push
     const remotes = await git.getRemotes()
     if (remotes.find(r => r.name === 'origin')) {
       await git.remote(['set-url', 'origin', remoteUrl])
@@ -108,7 +119,6 @@ ipcMain.handle('git:publish', async (_e, repoPath: string, remoteUrl: string) =>
       await git.addRemote('origin', remoteUrl)
     }
 
-    // Temporarily swap to auth URL for push
     await git.remote(['set-url', 'origin', authUrl])
     try {
       await git.push(['-u', 'origin', branch])
@@ -378,6 +388,71 @@ ipcMain.handle('git:init', async (_e, repoPath: string) => {
   }
 })
 
+ipcMain.handle('git:get-working-diff', async (_e, repoPath: string, filePath: string, isUntracked: boolean, isStaged: boolean) => {
+  try {
+    const git = simpleGit(repoPath)
+    if (isUntracked) {
+      const content = fs.readFileSync(path.join(repoPath, filePath), 'utf-8')
+      return content.split('\n').map(l => `+${l}`).join('\n')
+    }
+    if (isStaged) {
+      return await git.diff(['--cached', '--', filePath])
+    }
+    return await git.diff(['HEAD', '--', filePath])
+  } catch {
+    return ''
+  }
+})
+
+ipcMain.handle('git:get-status', async (_e, repoPath: string) => {
+  try {
+    const result = await simpleGit(repoPath).status()
+    return result.files.map(f => ({ path: f.path, index: f.index, working_dir: f.working_dir }))
+  } catch {
+    return []
+  }
+})
+
+ipcMain.handle('git:stage-file', async (_e, repoPath: string, filePath: string) => {
+  try {
+    await simpleGit(repoPath).add(filePath)
+    return { success: true }
+  } catch (e) {
+    return { success: false, error: String(e) }
+  }
+})
+
+ipcMain.handle('git:unstage-file', async (_e, repoPath: string, filePath: string) => {
+  try {
+    await simpleGit(repoPath).raw(['reset', 'HEAD', '--', filePath])
+    return { success: true }
+  } catch (e) {
+    return { success: false, error: String(e) }
+  }
+})
+
+ipcMain.handle('git:stage-all', async (_e, repoPath: string) => {
+  try {
+    await simpleGit(repoPath).add('.')
+    return { success: true }
+  } catch (e) {
+    return { success: false, error: String(e) }
+  }
+})
+
+ipcMain.handle('git:commit', async (_e, repoPath: string, message: string) => {
+  try {
+    const { name, email } = loadProfile()
+    const git = simpleGit(repoPath)
+    if (name) await git.addConfig('user.name', name)
+    if (email) await git.addConfig('user.email', email)
+    const result = await git.commit(message)
+    return { success: true, hash: result.commit }
+  } catch (e) {
+    return { success: false, error: String(e) }
+  }
+})
+
 ipcMain.handle('git:fetch', async (_e, repoPath: string) => {
   try {
     const git = simpleGit(repoPath)
@@ -460,5 +535,15 @@ ipcMain.handle('fs:read-file', async (_e, repoPath: string, relativeFilePath: st
     return { path: relativeFilePath, content }
   } catch (e) {
     return { error: String(e) }
+  }
+})
+
+ipcMain.handle('fs:write-file', async (_e, repoPath: string, relativeFilePath: string, content: string) => {
+  try {
+    const fullPath = path.join(repoPath, relativeFilePath)
+    fs.writeFileSync(fullPath, content, 'utf-8')
+    return { success: true }
+  } catch (e) {
+    return { success: false, error: String(e) }
   }
 })

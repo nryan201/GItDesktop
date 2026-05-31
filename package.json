@@ -13,6 +13,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@monaco-editor/react": "^4.7.0",
     "lucide-react": "^0.511.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
@@ -53,7 +54,14 @@
       "dist-electron/**"
     ],
     "win": {
-      "target": [{ "target": "nsis", "arch": ["x64"] }]
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
     },
     "mac": {
       "target": "dmg",

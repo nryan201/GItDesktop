@@ -53,11 +53,11 @@ function TreeNode({ node, level = 0 }: TreeNodeProps) {
   )
 }
 
-export function FileExplorer() {
+export function FileExplorer({ width }: { width?: number }) {
   const { currentRepo, fileTree } = useGitStore()
 
   return (
-    <div className="flex h-full w-80 flex-col border-r border-zinc-800 bg-zinc-900">
+    <div className="flex h-full flex-col border-r border-zinc-800 bg-zinc-900" style={{ width: width ?? 320 }}>
       <div className="border-b border-zinc-800 px-3 py-2">
         <h2 className="text-sm font-semibold text-white">Explorer</h2>
         <p className="truncate text-xs text-gray-400">

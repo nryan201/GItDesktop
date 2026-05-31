@@ -5,6 +5,7 @@ import type {
   ChangedFile,
   Notification,
   FileTreeNode,
+  GitStatusFile,
 } from '../types/git'
 
 interface GitState {
@@ -23,8 +24,17 @@ interface GitState {
   selectedExplorerFile: string | null
   fileContent: string
   pendingInitRepo: string | null
+  gitStatus: GitStatusFile[]
+  selectedStatusFile: GitStatusFile | null
+  workingDiff: string
 
   init: () => Promise<void>
+  refreshStatus: () => Promise<void>
+  selectStatusFile: (f: GitStatusFile) => Promise<void>
+  stageFile: (filePath: string) => Promise<void>
+  unstageFile: (filePath: string) => Promise<void>
+  stageAll: () => Promise<void>
+  commitChanges: (message: string) => Promise<void>
   openRepository: () => Promise<void>
   initRepository: (repoPath: string) => Promise<void>
   cancelInitRepo: () => void
@@ -57,9 +67,61 @@ export const useGitStore = create<GitState>()((set, get) => ({
   selectedExplorerFile: null,
   fileContent: '',
   pendingInitRepo: null,
+  gitStatus: [],
+  selectedStatusFile: null,
+  workingDiff: '',
 
   clearNotification: () => set({ notification: null }),
   cancelInitRepo: () => set({ pendingInitRepo: null }),
+
+  selectStatusFile: async (f: GitStatusFile) => {
+    const { currentRepo } = get()
+    if (!currentRepo) return
+    const isUntracked = f.index === '?' && f.working_dir === '?'
+    const isStaged = f.index !== ' ' && f.index !== '?'
+    const diff = await window.gitAPI.getWorkingDiff(currentRepo, f.path, isUntracked, isStaged)
+    set({ selectedStatusFile: f, workingDiff: diff, selectedExplorerFile: null })
+  },
+
+  refreshStatus: async () => {
+    const { currentRepo } = get()
+    if (!currentRepo) return
+    const status = await window.gitAPI.getStatus(currentRepo)
+    set({ gitStatus: status })
+  },
+
+  stageFile: async (filePath: string) => {
+    const { currentRepo, refreshStatus } = get()
+    if (!currentRepo) return
+    await window.gitAPI.stageFile(currentRepo, filePath)
+    await refreshStatus()
+  },
+
+  unstageFile: async (filePath: string) => {
+    const { currentRepo, refreshStatus } = get()
+    if (!currentRepo) return
+    await window.gitAPI.unstageFile(currentRepo, filePath)
+    await refreshStatus()
+  },
+
+  stageAll: async () => {
+    const { currentRepo, refreshStatus } = get()
+    if (!currentRepo) return
+    await window.gitAPI.stageAll(currentRepo)
+    await refreshStatus()
+  },
+
+  commitChanges: async (message: string) => {
+    const { currentRepo } = get()
+    if (!currentRepo) return
+    const result = await window.gitAPI.commitChanges(currentRepo, message)
+    if (result.success) {
+      const commits = await window.gitAPI.getCommits(currentRepo, get().currentBranch ?? undefined)
+      set({ commits, gitStatus: [], notification: { type: 'success', message: 'Commit created' } })
+    } else {
+      set({ notification: { type: 'error', message: result.error ?? 'Commit failed' } })
+    }
+  },
 
   init: async () => {
     const repositories = await window.gitAPI.getRepositories()
@@ -129,6 +191,7 @@ export const useGitStore = create<GitState>()((set, get) => ({
 
     try {
       await get().loadFileTree()
+      await get().refreshStatus()
     } catch {
       // file tree optional
     } finally {
@@ -420,6 +483,8 @@ export const useGitStore = create<GitState>()((set, get) => ({
         set({
           selectedExplorerFile: filePath,
           fileContent: result.content,
+          selectedStatusFile: null,
+          workingDiff: '',
         })
       } else {
         set({

@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { GitCommit } from 'lucide-react'
 import { useGitStore } from '../store/useGitStore'
+import { ChangesPanel } from './ChangesPanel'
 import type { Commit } from '../types/git'
 
 function relativeDate(dateStr: string): string {
@@ -74,12 +76,14 @@ function CommitRow({ commit, selected, onClick }: {
   )
 }
 
-export function CommitHistory() {
-  const { commits, selectedCommit, selectCommit, currentRepo, currentBranch } = useGitStore()
+export function CommitHistory({ width }: { width?: number }) {
+  const { commits, selectedCommit, selectCommit, currentRepo, currentBranch, gitStatus } = useGitStore()
+  const [tab, setTab] = useState<'history' | 'changes'>('history')
+  const changesCount = gitStatus.filter(f => f.working_dir !== ' ' || (f.index !== ' ' && f.index !== '?')).length
 
   if (!currentRepo) {
     return (
-      <div className="w-80 shrink-0 flex flex-col items-center justify-center bg-[#0d1117] border-r border-[#30363d]">
+      <div className="shrink-0 flex flex-col items-center justify-center bg-[#0d1117] border-r border-[#30363d]" style={{ width: width ?? 320 }}>
         <GitCommit size={28} className="text-[#30363d] mb-2" />
         <p className="text-xs text-[#8b949e]">No repository selected</p>
       </div>
@@ -87,22 +91,45 @@ export function CommitHistory() {
   }
 
   return (
-    <div className="w-80 shrink-0 flex flex-col bg-[#0d1117] border-r border-[#30363d] overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-2 px-3 py-2 border-b border-[#30363d] shrink-0">
-        <GitCommit size={14} className="text-[#8b949e]" />
-        <span className="text-xs font-semibold text-[#8b949e] uppercase tracking-wider">
-          History
-        </span>
-        {currentBranch && (
-          <span className="ml-auto text-[10px] text-[#3fb950] bg-[#238636]/20 px-1.5 py-0.5 rounded-full truncate max-w-[120px]">
+    <div className="shrink-0 flex flex-col bg-[#0d1117] border-r border-[#30363d] overflow-hidden" style={{ width: width ?? 320 }}>
+      {/* Tabs */}
+      <div className="flex border-b border-[#30363d] shrink-0">
+        <button
+          onClick={() => setTab('history')}
+          className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium transition-colors border-b-2 ${
+            tab === 'history'
+              ? 'border-[#58a6ff] text-[#e6edf3]'
+              : 'border-transparent text-[#8b949e] hover:text-[#e6edf3]'
+          }`}
+        >
+          <GitCommit size={12} /> History
+        </button>
+        <button
+          onClick={() => setTab('changes')}
+          className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium transition-colors border-b-2 ${
+            tab === 'changes'
+              ? 'border-[#58a6ff] text-[#e6edf3]'
+              : 'border-transparent text-[#8b949e] hover:text-[#e6edf3]'
+          }`}
+        >
+          Changes
+          {changesCount > 0 && (
+            <span className="bg-[#d29922] text-black text-[9px] font-bold px-1 py-0.5 rounded-full leading-none">
+              {changesCount}
+            </span>
+          )}
+        </button>
+        {currentBranch && tab === 'history' && (
+          <span className="ml-auto self-center mr-3 text-[10px] text-[#3fb950] bg-[#238636]/20 px-1.5 py-0.5 rounded-full truncate max-w-[100px]">
             {currentBranch}
           </span>
         )}
       </div>
 
-      {/* Commit list */}
-      <div className="flex-1 overflow-y-auto">
+      {tab === 'changes' && <ChangesPanel />}
+
+      {/* Commit list — hidden when Changes tab is active */}
+      <div className={`flex-1 overflow-y-auto ${tab === 'changes' ? 'hidden' : ''}`}>
         {commits.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full">
             <p className="text-xs text-[#8b949e]">No commits found</p>
@@ -120,7 +147,7 @@ export function CommitHistory() {
       </div>
 
       {/* Footer */}
-      {commits.length > 0 && (
+      {commits.length > 0 && tab === 'history' && (
         <div className="px-3 py-1.5 border-t border-[#30363d] shrink-0">
           <span className="text-[10px] text-[#6e7681]">{commits.length} commits</span>
         </div>

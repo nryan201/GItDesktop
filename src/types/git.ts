@@ -40,6 +40,12 @@ export interface FileContentResult {
   content: string
 }
 
+export interface GitStatusFile {
+  path: string
+  index: string
+  working_dir: string
+}
+
 export interface GitHubRepo {
   id: number
   name: string

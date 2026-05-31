@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { GitBranch } from 'lucide-react'
 import { Toolbar } from './components/Toolbar'
 import { Sidebar } from './components/Sidebar'
@@ -80,10 +80,30 @@ function Toast() {
   )
 }
 
+function Resizer({ onDelta }: { onDelta: (dx: number) => void }) {
+  const onMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+    let lastX = e.clientX
+    const onMove = (e: MouseEvent) => { onDelta(e.clientX - lastX); lastX = e.clientX }
+    const onUp = () => { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp) }
+    document.addEventListener('mousemove', onMove)
+    document.addEventListener('mouseup', onUp)
+  }, [onDelta])
+
+  return (
+    <div
+      onMouseDown={onMouseDown}
+      className="w-1 shrink-0 cursor-col-resize bg-[#30363d] hover:bg-[#58a6ff] transition-colors"
+    />
+  )
+}
+
 export default function App() {
   const init = useGitStore(s => s.init)
   const [showClone, setShowClone] = useState(false)
   const [cloneInitialUrl, setCloneInitialUrl] = useState('')
+  const [explorerWidth, setExplorerWidth] = useState(200)
+  const [centerWidth, setCenterWidth] = useState(320)
 
   useEffect(() => {
     void init()
@@ -94,8 +114,10 @@ export default function App() {
       <Toolbar onCloneClick={(url = '') => { setCloneInitialUrl(url); setShowClone(true) }} />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
-        <FileExplorer />
-        <CommitHistory />
+        <Resizer onDelta={dx => setExplorerWidth(w => Math.max(120, w + dx))} />
+        <FileExplorer width={explorerWidth} />
+        <Resizer onDelta={dx => setCenterWidth(w => Math.max(220, w + dx))} />
+        <CommitHistory width={centerWidth} />
         <FilePreview />
       </div>
       <Toast />

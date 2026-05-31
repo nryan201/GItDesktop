@@ -26,12 +26,20 @@ declare global {
       getCommitFiles: (repoPath: string, hash: string) => Promise<ChangedFile[]>
       getDiff: (repoPath: string, hash: string, file: string) => Promise<string>
 
+      getWorkingDiff: (repoPath: string, filePath: string, isUntracked: boolean, isStaged: boolean) => Promise<string>
+      getStatus: (repoPath: string) => Promise<GitStatusFile[]>
+      stageFile: (repoPath: string, filePath: string) => Promise<{ success: boolean; error?: string }>
+      unstageFile: (repoPath: string, filePath: string) => Promise<{ success: boolean; error?: string }>
+      stageAll: (repoPath: string) => Promise<{ success: boolean; error?: string }>
+      commitChanges: (repoPath: string, message: string) => Promise<{ success: boolean; hash?: string; error?: string }>
+
       fetch: (repoPath: string) => Promise<{ success: boolean; error?: string }>
       push: (repoPath: string) => Promise<{ success: boolean; error?: string }>
 
       // File system
       getFileTree: (repoPath: string) => Promise<FileTreeNode[] | { error: string }>
       readFile: (repoPath: string, relativeFilePath: string) => Promise<FileContentResult | { error: string }>
+      writeFile: (repoPath: string, relativeFilePath: string, content: string) => Promise<{ success: boolean; error?: string }>
 
       // Profile
       getProfile: () => Promise<{ name: string; email: string; token: string; githubToken: string; githubLogin: string; githubAvatar: string }>
