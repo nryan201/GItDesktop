@@ -20,12 +20,12 @@ function TreeNode({ node, level = 0 }: TreeNodeProps) {
       <div>
         <button
           onClick={() => setOpen(!open)}
-          className="flex w-full items-center gap-2 px-2 py-1 text-left text-sm text-gray-200 hover:bg-zinc-800"
+          className="flex w-full items-center gap-1.5 py-1 text-left text-xs text-[#9191aa] hover:text-[#e4e4f0] hover:bg-[#1f1f31] transition-all"
           style={{ paddingLeft }}
         >
-          {open ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-          {open ? <FolderOpen size={16} /> : <Folder size={16} />}
-          <span className="truncate">{node.name}</span>
+          {open ? <ChevronDown size={13} className="shrink-0 text-[#5a5a72]" /> : <ChevronRight size={13} className="shrink-0 text-[#5a5a72]" />}
+          {open ? <FolderOpen size={13} className="shrink-0 text-[#7c6af7]" /> : <Folder size={13} className="shrink-0 text-[#5a5a72]" />}
+          <span className="truncate font-medium">{node.name}</span>
         </button>
 
         {open && node.children?.length ? (
@@ -42,12 +42,14 @@ function TreeNode({ node, level = 0 }: TreeNodeProps) {
   return (
     <button
       onClick={() => selectExplorerFile(node.path)}
-      className={`flex w-full items-center gap-2 px-2 py-1 text-left text-sm hover:bg-zinc-800 ${
-        isSelected ? 'bg-zinc-700 text-white' : 'text-gray-300'
+      className={`flex w-full items-center gap-1.5 py-1 text-left text-xs transition-all ${
+        isSelected
+          ? 'bg-[#7c6af71a] text-[#e4e4f0] border-r-2 border-[#7c6af7]'
+          : 'text-[#9191aa] hover:text-[#e4e4f0] hover:bg-[#1f1f31]'
       }`}
       style={{ paddingLeft }}
     >
-      <FileText size={16} />
+      <FileText size={12} className={`shrink-0 ${isSelected ? 'text-[#a594f9]' : 'text-[#5a5a72]'}`} />
       <span className="truncate">{node.name}</span>
     </button>
   )
@@ -57,17 +59,17 @@ export function FileExplorer({ width }: { width?: number }) {
   const { currentRepo, fileTree } = useGitStore()
 
   return (
-    <div className="flex h-full flex-col border-r border-zinc-800 bg-zinc-900" style={{ width: width ?? 320 }}>
-      <div className="border-b border-zinc-800 px-3 py-2">
-        <h2 className="text-sm font-semibold text-white">Explorer</h2>
-        <p className="truncate text-xs text-gray-400">
-          {currentRepo ?? 'No repository selected'}
+    <div className="flex h-full flex-col border-r border-[#22223a] bg-[#12121c]" style={{ width: width ?? 320 }}>
+      <div className="border-b border-[#22223a] px-4 py-3">
+        <h2 className="text-[10px] font-bold uppercase tracking-widest text-[#5a5a72]">Explorer</h2>
+        <p className="truncate text-xs text-[#9191aa] mt-0.5 font-medium">
+          {currentRepo?.split(/[\\/]/).pop() ?? 'No repository selected'}
         </p>
       </div>
 
-      <div className="flex-1 overflow-auto py-2">
+      <div className="flex-1 overflow-auto py-1">
         {fileTree.length === 0 ? (
-          <div className="px-3 py-2 text-sm text-gray-400">
+          <div className="px-4 py-3 text-xs text-[#5a5a72]">
             No files to display
           </div>
         ) : (
