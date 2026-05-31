@@ -59,7 +59,7 @@ export function Toolbar({ onCloneClick }: Props) {
       </button>
 
       <button
-        onClick={onCloneClick}
+        onClick={() => onCloneClick()}
         className="toolbar-btn"
         title="Clone remote repository"
       >

@@ -23,7 +23,8 @@ export function ProfileDialog({ onClose }: Props) {
 
   async function handleSave() {
     setSaving(true)
-    await window.gitAPI.saveProfile({ name, email, token })
+    const existing = await window.gitAPI.getProfile()
+    await window.gitAPI.saveProfile({ ...existing, name, email, token })
     setSaving(false)
     setSaved(true)
     setTimeout(() => { setSaved(false); onClose() }, 800)
