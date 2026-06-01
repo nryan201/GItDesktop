@@ -59,6 +59,11 @@ contextBridge.exposeInMainWorld('gitAPI', {
   saveProfile: (profile: { name: string; email: string; token: string; githubToken: string; githubLogin: string; githubAvatar: string }) =>
     ipcRenderer.invoke('profile:save', profile),
 
+  // Window controls
+  windowMinimize: () => ipcRenderer.send('window:minimize'),
+  windowMaximize: () => ipcRenderer.send('window:maximize'),
+  windowClose: () => ipcRenderer.send('window:close'),
+
   // GitHub OAuth
   openExternal: (url: string) => ipcRenderer.invoke('shell:open-external', url),
   githubDeviceAuthStart: () => ipcRenderer.invoke('github:device-auth-start'),

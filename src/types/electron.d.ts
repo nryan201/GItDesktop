@@ -56,6 +56,10 @@ declare global {
       githubListRepos: (token: string) => Promise<GitHubRepo[]>
       githubCreateRepo: (token: string, name: string, isPrivate: boolean, description: string, autoInit?: boolean) => Promise<GitHubRepo & { message?: string }>
       publishToGitHub: (repoPath: string, remoteUrl: string) => Promise<{ success: boolean; error?: string }>
+
+      windowMinimize: () => void
+      windowMaximize: () => void
+      windowClose: () => void
     }
   }
 }
